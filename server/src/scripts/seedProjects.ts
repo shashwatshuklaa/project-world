@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import '../config/env.js';
 
 import { connectDB, disconnectDB } from '../config/db.js';
 import { Category } from '../models/Category.js';
