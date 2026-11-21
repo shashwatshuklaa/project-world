@@ -42,9 +42,14 @@ export const Footer: React.FC = () => {
             </h2>
             <ul className="space-y-2 text-xs text-slate-500">
               {categories.map((cat) => (
-                <li key={cat.name} className="flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-blue-600" aria-hidden="true" />
-                  <span>{cat.name}</span>
+                <li key={cat.name}>
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(cat.name)}`}
+                    className="flex items-center gap-1.5 text-slate-500 hover:text-blue-600 transition-colors"
+                  >
+                    <span className="h-1 w-1 rounded-full bg-blue-600" aria-hidden="true" />
+                    <span>{cat.name}</span>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -62,6 +67,14 @@ export const Footer: React.FC = () => {
                   className="text-slate-500 hover:text-blue-600 transition-colors"
                 >
                   Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/shop"
+                  className="text-slate-500 hover:text-blue-600 transition-colors"
+                >
+                  Browse Projects
                 </Link>
               </li>
               {isAuthenticated ? (

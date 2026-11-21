@@ -34,14 +34,14 @@ export const CtaSection: React.FC = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center items-center">
-              {/* Primary Action: Scrolls to Featured Projects on page */}
-              <a
-                href="#featured-projects"
+              {/* Primary Action: Navigates to Shop catalog */}
+              <Link
+                to="/shop"
                 className="inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold text-blue-700 bg-white rounded-xl hover:bg-blue-50 active:bg-blue-100 shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
               >
-                <span>Explore Featured Projects</span>
+                <span>Explore All Projects</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
 
               {/* Secondary Action: Working Auth Link */}
               {isAuthenticated ? (

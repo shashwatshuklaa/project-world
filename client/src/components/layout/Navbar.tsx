@@ -123,6 +123,9 @@ export const Navbar: React.FC = () => {
           <NavLink to="/" className={navLinkClasses} end>
             Home
           </NavLink>
+          <NavLink to="/shop" className={navLinkClasses}>
+            Browse Projects
+          </NavLink>
           {isAuthenticated && (
             <NavLink to="/profile" className={navLinkClasses}>
               Profile
@@ -132,23 +135,32 @@ export const Navbar: React.FC = () => {
 
         {/* Actions & Utilities */}
         <div className="flex items-center space-x-3">
-          {/* Search Input - Desktop (Explicitly marked coming soon) */}
-          <div
+          {/* Search Input - Desktop */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const input = e.currentTarget.elements.namedItem('navSearch') as HTMLInputElement | null;
+              const term = input?.value?.trim();
+              if (term) {
+                navigate(`/shop?search=${encodeURIComponent(term)}`);
+              } else {
+                navigate('/shop');
+              }
+            }}
             className="relative hidden lg:block"
-            title="Search will be activated with the project catalog"
           >
             <input
+              name="navSearch"
               type="text"
-              disabled
-              placeholder="Search (coming soon)"
-              aria-label="Search projects (currently unavailable)"
-              className="w-52 h-8 rounded-full border border-slate-200 bg-slate-50 px-8 text-xs text-slate-400 placeholder:text-slate-400 cursor-not-allowed focus:outline-none select-none"
+              placeholder="Search projects..."
+              aria-label="Search projects"
+              className="w-52 h-8 rounded-full border border-slate-200 bg-slate-50 px-8 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
             />
             <Search
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300"
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400"
               aria-hidden="true"
             />
-          </div>
+          </form>
 
           {/* Cart Indicator (Non-interactive visual element) */}
           <div
@@ -273,6 +285,13 @@ export const Navbar: React.FC = () => {
               end
             >
               Home
+            </NavLink>
+            <NavLink
+              to="/shop"
+              className={mobileNavLinkClasses}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Browse Projects
             </NavLink>
             {isAuthenticated && (
               <NavLink

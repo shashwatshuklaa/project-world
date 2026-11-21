@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.routes.js';
+import projectRoutes from './routes/project.routes.js';
 
 const app = express();
 
@@ -35,5 +36,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Project catalog browsing routes
+app.use('/api/projects', projectRoutes);
 
 export default app;

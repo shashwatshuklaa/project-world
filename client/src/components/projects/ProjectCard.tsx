@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Star, Download, FolderGit2, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Star, Download, FolderGit2, Sparkles, ArrowRight } from 'lucide-react';
 import { Project, ProjectDifficulty } from '../../types/project';
 
 export interface ProjectCardProps {
@@ -28,14 +29,20 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   const isFeatured = featured || project.featured;
+  const projectIdentifier = project.slug || project.id;
+  const detailUrl = `/projects/${encodeURIComponent(projectIdentifier)}`;
 
   return (
     <article
       className="group flex flex-col h-full rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
       aria-label={project.title}
     >
-      {/* Media Container */}
-      <div className="relative w-full aspect-[4/3] bg-slate-100 overflow-hidden">
+      {/* Media Container with Navigation Link */}
+      <Link
+        to={detailUrl}
+        className="relative w-full aspect-[4/3] bg-slate-100 overflow-hidden block focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+        aria-label={`View ${project.title} details`}
+      >
         {imageError ? (
           <div
             className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100 p-4 text-center"
@@ -68,7 +75,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="absolute top-3 right-3 rounded-lg bg-white/95 backdrop-blur-xs px-2.5 py-1 text-xs font-bold text-slate-900 border border-slate-200/60 shadow-xs">
           ₹{Math.round(project.price).toLocaleString('en-IN')}
         </div>
-      </div>
+      </Link>
 
       {/* Content Body */}
       <div className="p-5 flex flex-col flex-1">
@@ -100,7 +107,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           className="text-base font-bold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors line-clamp-1 mb-2"
           title={project.title}
         >
-          {project.title}
+          <Link
+            to={detailUrl}
+            className="focus:outline-hidden focus:underline"
+          >
+            {project.title}
+          </Link>
         </h3>
 
         {/* Description */}
@@ -127,6 +139,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {project.difficulty}
             </span>
           )}
+        </div>
+
+        {/* View Details Action Button */}
+        <div className="mt-3 pt-3 border-t border-slate-100">
+          <Link
+            to={detailUrl}
+            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 border border-slate-200/60 transition-all focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+          >
+            <span>View Details</span>
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
     </article>

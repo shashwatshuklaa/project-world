@@ -6,6 +6,8 @@ import { ProtectedRoute } from './components/routes/ProtectedRoute';
 import { GuestRoute } from './components/routes/GuestRoute';
 import { MainLayout } from './components/layout/MainLayout';
 import { HomePage } from './pages/HomePage';
+import { ShopPage } from './pages/ShopPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -23,6 +25,8 @@ export const App: React.FC = () => {
       {/* Routes utilizing the shared MainLayout (Navbar + Footer) */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/projects/:id" element={<ProjectDetailPage />} />
       </Route>
 
       {/* Guest-only Routes (Standalone authentication layout) */}

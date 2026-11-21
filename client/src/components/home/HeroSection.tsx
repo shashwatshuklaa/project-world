@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Code2, RefreshCw } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
@@ -42,13 +43,13 @@ export const HeroSection: React.FC = () => {
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-4 justify-center lg:justify-start items-center">
-              <a
-                href="#featured-projects"
+              <Link
+                to="/shop"
                 className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 Browse Projects
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
 
               <button
                 type="button"
@@ -71,13 +72,14 @@ export const HeroSection: React.FC = () => {
               </p>
               <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                 {categoryChips.map((chip) => (
-                  <span
+                  <Link
                     key={chip}
-                    className="text-xs px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 shadow-2xs font-medium select-none"
-                    title="Catalog filtering coming in next phase"
+                    to={`/shop?search=${encodeURIComponent(chip)}`}
+                    className="text-xs px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-300 shadow-2xs font-medium transition-colors"
+                    title={`Browse ${chip}`}
                   >
                     {chip}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </div>
