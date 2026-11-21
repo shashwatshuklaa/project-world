@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { ProtectedRoute } from './components/routes/ProtectedRoute';
 import { GuestRoute } from './components/routes/GuestRoute';
+import { MainLayout } from './components/layout/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -19,10 +20,12 @@ export const App: React.FC = () => {
 
   return (
     <Routes>
-      {/* Public Route */}
-      <Route path="/" element={<HomePage />} />
+      {/* Routes utilizing the shared MainLayout (Navbar + Footer) */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
 
-      {/* Guest-only Routes (redirect to profile/return path if already logged in) */}
+      {/* Guest-only Routes (Standalone authentication layout) */}
       <Route
         path="/login"
         element={
@@ -40,7 +43,7 @@ export const App: React.FC = () => {
         }
       />
 
-      {/* Protected Routes (redirect to /login if unauthenticated) */}
+      {/* Protected Routes (Standalone account dashboard layout) */}
       <Route
         path="/profile"
         element={

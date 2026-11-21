@@ -39,7 +39,7 @@ async function authFetch<T>(endpoint: string, options: RequestInit = {}): Promis
   let response: Response;
   try {
     response = await fetch(endpoint, config);
-  } catch (err) {
+  } catch {
     throw new AuthError(
       'Network error. Please check your internet connection or backend server status.',
       0
@@ -47,7 +47,7 @@ async function authFetch<T>(endpoint: string, options: RequestInit = {}): Promis
   }
 
   // Parse JSON response safely
-  let data: any = null;
+  let data: unknown = null;
   const contentType = response.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
     try {
