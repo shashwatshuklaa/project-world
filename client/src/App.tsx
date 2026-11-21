@@ -8,6 +8,7 @@ import { MainLayout } from './components/layout/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
+import { CartPage } from './pages/CartPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -27,6 +28,14 @@ export const App: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Guest-only Routes (Standalone authentication layout) */}

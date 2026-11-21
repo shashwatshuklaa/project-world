@@ -10,9 +10,11 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -162,17 +164,31 @@ export const Navbar: React.FC = () => {
             />
           </form>
 
-          {/* Cart Indicator (Non-interactive visual element) */}
-          <div
-            className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-slate-400 cursor-not-allowed select-none"
-            aria-label="Shopping Cart (coming soon)"
-            title="Cart is not available yet"
+          {/* Cart Navigation Link with Live Item Counter */}
+          <Link
+            to="/cart"
+            className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={
+              isAuthenticated && !isAuthLoading && cartCount > 0
+                ? `Shopping Cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`
+                : 'Shopping Cart'
+            }
           >
-            <ShoppingCart className="h-4 w-4 text-slate-300" aria-hidden="true" />
-            <span className="hidden sm:inline-block text-[11px] font-medium text-slate-400">
-              Cart coming soon
+            <div className="relative flex items-center justify-center">
+              <ShoppingCart className="h-5 w-5 text-slate-600 group-hover:text-blue-600 transition-colors" aria-hidden="true" />
+              {isAuthenticated && !isAuthLoading && cartCount > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white shadow-xs"
+                  aria-hidden="true"
+                >
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </div>
+            <span className="hidden sm:inline-block text-xs font-semibold">
+              Cart
             </span>
-          </div>
+          </Link>
 
           {/* Authentication State Navigation */}
           {isAuthenticated && user ? (
@@ -292,6 +308,23 @@ export const Navbar: React.FC = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Browse Projects
+            </NavLink>
+            <NavLink
+              to="/cart"
+              className={mobileNavLinkClasses}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Shopping Cart</span>
+                </span>
+                {isAuthenticated && !isAuthLoading && cartCount > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-blue-600 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
             </NavLink>
             {isAuthenticated && (
               <NavLink

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import authRoutes from './routes/auth.routes.js';
 import projectRoutes from './routes/project.routes.js';
+import cartRoutes from './routes/cart.routes.js';
 
 const app = express();
 
@@ -39,5 +40,8 @@ app.use('/api/auth', authRoutes);
 
 // Project catalog browsing routes
 app.use('/api/projects', projectRoutes);
+
+// Shopping cart routes (protected by requireAuth)
+app.use('/api/cart', cartRoutes);
 
 export default app;

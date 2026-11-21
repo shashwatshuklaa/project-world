@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   Star,
@@ -15,8 +15,12 @@ import {
   Info,
   Layers,
   BarChart2,
+  ShoppingCart,
+  Loader2,
 } from 'lucide-react';
 import { projectService, ProjectApiError } from '../services/project.service';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import { Project, ProjectDifficulty } from '../types/project';
 import { ProjectCard } from '../components/projects/ProjectCard';
 
@@ -24,6 +28,10 @@ type TabType = 'overview' | 'specs';
 
 export const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,9 +40,52 @@ export const ProjectDetailPage: React.FC = () => {
   const [imageError, setImageError] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
+  // Cart action state
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
+  const [cartFeedback, setCartFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+
   // Related projects state
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [isLoadingRelated, setIsLoadingRelated] = useState<boolean>(false);
+
+  const handleAddToCart = async () => {
+    if (!project) return;
+
+    // Unauthenticated users are redirected to login with current location as return path
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    if (isAddingToCart) return;
+
+    setIsAddingToCart(true);
+    setCartFeedback(null);
+
+    const projectIdentifier = project.slug || project.id;
+
+    try {
+      await addToCart(projectIdentifier, 1);
+      setCartFeedback({
+        type: 'success',
+        message: 'Project added to your shopping cart!',
+      });
+      // Clear success feedback automatically after 5 seconds
+      setTimeout(() => {
+        setCartFeedback((prev) => (prev?.type === 'success' ? null : prev));
+      }, 5000);
+    } catch (err: unknown) {
+      setCartFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to add project to cart. Please try again.',
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   // Difficulty badge styling
   const getDifficultyBadge = (difficulty?: ProjectDifficulty) => {
@@ -395,23 +446,73 @@ export const ProjectDetailPage: React.FC = () => {
                 Official price listed in the ProjectWorld catalog.
               </p>
 
-              {/* Action Button: Clearly marked coming soon (cart/checkout not implemented yet) */}
+              {/* Action Buttons: Add to Cart & Checkout Indicator */}
               <div className="mt-5 space-y-3">
+                {/* Primary Add to Cart Action */}
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                  className="w-full py-3.5 px-6 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  {isAddingToCart ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      <span>Adding to Cart...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-4 w-4 text-white" />
+                      <span>Add to Cart</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Direct Checkout Indicator (Disabled) */}
                 <button
                   type="button"
                   disabled
-                  className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/80 flex items-center justify-center gap-2 shadow-none"
+                  className="w-full py-3 px-6 rounded-xl font-semibold text-xs bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/80 flex items-center justify-center gap-2 shadow-none select-none"
                   aria-disabled="true"
                 >
-                  <Lock className="h-4 w-4 text-slate-400" />
-                  <span>Direct Checkout (Coming in Phase 7)</span>
+                  <Lock className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Checkout — Coming Soon</span>
                 </button>
 
-                <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 text-xs text-slate-600 flex items-start gap-2.5 leading-relaxed">
-                  <Info className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
+                {/* Feedback Notification Banners */}
+                {cartFeedback && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2.5 transition-all animate-in fade-in duration-200 ${
+                      cartFeedback.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-red-50 border-red-200 text-red-700'
+                    }`}
+                    role="alert"
+                  >
+                    <div className="flex items-center gap-2">
+                      {cartFeedback.type === 'success' ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+                      )}
+                      <span className="font-medium">{cartFeedback.message}</span>
+                    </div>
+
+                    {cartFeedback.type === 'success' && (
+                      <Link
+                        to="/cart"
+                        className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline shrink-0 focus:outline-none"
+                      >
+                        View Cart &rarr;
+                      </Link>
+                    )}
+                  </div>
+                )}
+
+                <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 text-[11px] text-slate-500 flex items-start gap-2 leading-relaxed">
+                  <Info className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
                   <span>
-                    Direct cart and checkout functionality will be enabled in upcoming project phases.
-                    All project details and feature specifications displayed below reflect verified catalog data.
+                    Items added to cart are automatically synchronized with your account in real-time. Direct payments will be enabled in upcoming project phases.
                   </span>
                 </div>
               </div>
