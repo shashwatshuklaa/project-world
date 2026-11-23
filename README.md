@@ -376,7 +376,7 @@ Before deploying ProjectWorld to production infrastructure, the following prereq
    - The frontend includes a `vercel.json` file providing two rewrite rules:
      1. Forwarding `/api/:path*` to the Render backend service.
      2. A fallback rule `/(.*)` routing all client-side navigation to `/index.html` to support React Router HTML5 pushState history on page refreshes.
-   - **Post-Deployment Placeholder Replacement**: Before deploying the frontend to Vercel, replace the placeholder hostname in `client/vercel.json` (`https://REPLACE_WITH_YOUR_RENDER_BACKEND_URL.onrender.com/api/:path*`) with your actual live Render Web Service URL.
+   - **Backend Destination URL**: Configured to forward `/api/:path*` to the deployed Render backend service (`https://project-world-api.onrender.com/api/:path*`).
 6. **Development Boundaries & Status**:
    - Automated tests run against in-memory models and mock gateway harnesses.
    - Live MongoDB Atlas connections, live Razorpay gateway transactions, domain DNS routing, and cloud hosting deployments have intentionally not been executed in accordance with milestone constraints.
