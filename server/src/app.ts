@@ -10,6 +10,9 @@ import webhookRoutes from './routes/webhook.routes.js';
 
 const app = express();
 
+// Configure trust proxy for deployment behind Render reverse proxy
+app.set('trust proxy', 1);
+
 // Security and utility middleware
 app.use(
   cors({

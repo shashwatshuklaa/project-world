@@ -44,4 +44,8 @@ describe('Authentication Rate Limiting', () => {
       assert.equal(res.body.message, 'Logged out successfully.');
     }
   });
+
+  it('configures trust proxy to 1 for deployment behind reverse proxies', () => {
+    assert.equal(app.get('trust proxy'), 1);
+  });
 });

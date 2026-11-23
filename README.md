@@ -369,7 +369,15 @@ Before deploying ProjectWorld to production infrastructure, the following prereq
    - Production requires a MongoDB replica set (MongoDB 4.2+ or MongoDB Atlas). Standalone single-node MongoDB without replica-set initiation (`rs.initiate()`) does not support transactions.
 3. **Managed Background Recovery Worker**:
    - The recovery worker (`npm run worker:recovery:prod`) must run as an independent, supervised background daemon (via PM2, systemd, or a containerized worker pod) with health monitoring and automatic restart policies.
-4. **Development Boundaries & Status**:
+4. **Render Reverse-Proxy Configuration (`trust proxy`)**:
+   - The Express application is configured with `app.set('trust proxy', 1)` to run securely behind Render's reverse proxy and load balancers.
+   - This ensures `express-rate-limit` accurately identifies real client IP addresses via the `X-Forwarded-For` header rather than throttling the shared proxy IP, and properly respects secure HTTPS protocols.
+5. **Vercel SPA & API Proxy Configuration (`client/vercel.json`)**:
+   - The frontend includes a `vercel.json` file providing two rewrite rules:
+     1. Forwarding `/api/:path*` to the Render backend service.
+     2. A fallback rule `/(.*)` routing all client-side navigation to `/index.html` to support React Router HTML5 pushState history on page refreshes.
+   - **Post-Deployment Placeholder Replacement**: Before deploying the frontend to Vercel, replace the placeholder hostname in `client/vercel.json` (`https://REPLACE_WITH_YOUR_RENDER_BACKEND_URL.onrender.com/api/:path*`) with your actual live Render Web Service URL.
+6. **Development Boundaries & Status**:
    - Automated tests run against in-memory models and mock gateway harnesses.
    - Live MongoDB Atlas connections, live Razorpay gateway transactions, domain DNS routing, and cloud hosting deployments have intentionally not been executed in accordance with milestone constraints.
 
