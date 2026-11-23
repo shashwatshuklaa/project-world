@@ -8,6 +8,7 @@ import {
   LogOut,
   Search,
   Loader2,
+  Package,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
@@ -129,9 +130,14 @@ export const Navbar: React.FC = () => {
             Browse Projects
           </NavLink>
           {isAuthenticated && (
-            <NavLink to="/profile" className={navLinkClasses}>
-              Profile
-            </NavLink>
+            <>
+              <NavLink to="/orders" className={navLinkClasses}>
+                Orders
+              </NavLink>
+              <NavLink to="/profile" className={navLinkClasses}>
+                Profile
+              </NavLink>
+            </>
           )}
         </nav>
 
@@ -234,6 +240,16 @@ export const Navbar: React.FC = () => {
                     My Profile
                   </Link>
 
+                  <Link
+                    to="/orders"
+                    role="menuitem"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors"
+                  >
+                    <Package className="mr-2 h-3.5 w-3.5 text-slate-400" />
+                    My Orders
+                  </Link>
+
                   <button
                     type="button"
                     role="menuitem"
@@ -327,13 +343,22 @@ export const Navbar: React.FC = () => {
               </div>
             </NavLink>
             {isAuthenticated && (
-              <NavLink
-                to="/profile"
-                className={mobileNavLinkClasses}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Profile
-              </NavLink>
+              <>
+                <NavLink
+                  to="/orders"
+                  className={mobileNavLinkClasses}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Orders
+                </NavLink>
+                <NavLink
+                  to="/profile"
+                  className={mobileNavLinkClasses}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </NavLink>
+              </>
             )}
           </nav>
 

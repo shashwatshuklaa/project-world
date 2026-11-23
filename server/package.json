@@ -8,6 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "tsx src/scripts/seedProjects.ts",
+    "worker:recovery": "tsx src/workers/payment-recovery.worker.ts",
+    "worker:recovery:prod": "node dist/workers/payment-recovery.worker.js",
     "test": "tsx --test src/__tests__/**/*.test.ts"
   },
   "dependencies": {
@@ -19,6 +21,7 @@
     "express-rate-limit": "^8.7.5",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.12.2",
+    "razorpay": "^2.9.8",
     "zod": "^4.6.7"
   },
   "devDependencies": {

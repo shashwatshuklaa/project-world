@@ -5,6 +5,8 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.routes.js';
 import projectRoutes from './routes/project.routes.js';
 import cartRoutes from './routes/cart.routes.js';
+import orderRoutes from './routes/order.routes.js';
+import webhookRoutes from './routes/webhook.routes.js';
 
 const app = express();
 
@@ -16,7 +18,27 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(express.json());
+
+// Route-specific raw-body middleware for Razorpay webhooks (ensures exact wire bytes are preserved)
+app.use(
+  '/api/webhooks',
+  express.raw({ type: '*/*' }),
+  (req: any, _res, next) => {
+    if (Buffer.isBuffer(req.body)) {
+      req.rawBody = req.body;
+    }
+    next();
+  }
+);
+
+// Standard JSON parser with verify callback to capture rawBody for any JSON request
+app.use(
+  express.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
@@ -43,5 +65,11 @@ app.use('/api/projects', projectRoutes);
 
 // Shopping cart routes (protected by requireAuth)
 app.use('/api/cart', cartRoutes);
+
+// Order creation and payment routes (protected by requireAuth)
+app.use('/api/orders', orderRoutes);
+
+// Razorpay webhook notification routes
+app.use('/api/webhooks', webhookRoutes);
 
 export default app;

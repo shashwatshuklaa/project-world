@@ -15,8 +15,11 @@ import {
   Layers,
   BarChart2,
   RefreshCw,
+  CreditCard,
+  AlertTriangle,
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
+import { useCheckout } from '../hooks/useCheckout';
 import { CartItem } from '../types/cart';
 
 /**
@@ -335,6 +338,7 @@ export const CartPage: React.FC = () => {
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);
+  const checkout = useCheckout();
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     setActiveItemId(itemId);
@@ -479,8 +483,136 @@ export const CartPage: React.FC = () => {
           </div>
         )}
 
-        {/* 2. Empty Cart State */}
-        {!hasItems ? (
+        {/* Checkout Error / Notification Banner */}
+        {checkout.errorMessage && (
+          <div
+            className={`mb-6 p-4 rounded-2xl border text-sm flex items-start justify-between gap-3 ${
+              checkout.uncertainVerification
+                ? 'bg-amber-50 border-amber-200 text-amber-800'
+                : checkout.status === 'cancelled'
+                ? 'bg-slate-100 border-slate-200 text-slate-700'
+                : 'bg-red-50 border-red-200 text-red-700'
+            }`}
+            role="alert"
+          >
+            <div className="flex items-start gap-2.5">
+              {checkout.uncertainVerification ? (
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              ) : checkout.status === 'cancelled' ? (
+                <AlertCircle className="h-5 w-5 text-slate-500 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+              )}
+              <div>
+                <p className="font-semibold">
+                  {checkout.uncertainVerification
+                    ? 'Payment Verification Pending'
+                    : checkout.status === 'cancelled'
+                    ? 'Checkout Cancelled'
+                    : 'Payment Notice'}
+                </p>
+                <p className="text-xs mt-0.5 leading-relaxed">{checkout.errorMessage}</p>
+                {checkout.uncertainVerification && (
+                  <div className="mt-2">
+                    <Link
+                      to="/orders"
+                      className="text-xs font-semibold text-amber-900 underline hover:text-amber-700"
+                    >
+                      Check Order History &rarr;
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {checkout.status !== 'cancelled' && !checkout.uncertainVerification && (
+                <button
+                  type="button"
+                  onClick={checkout.retryCheckout}
+                  disabled={checkout.isProcessing}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors focus:outline-none"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Retry
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={checkout.resetCheckout}
+                className="text-xs font-semibold opacity-60 hover:opacity-100 px-2 py-1 rounded"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 1.5. Payment Success View */}
+        {checkout.status === 'success' && checkout.verifiedOrder ? (
+          <div className="max-w-2xl mx-auto my-12 p-8 sm:p-12 rounded-3xl bg-white border border-emerald-200/90 shadow-xs text-center">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-emerald-100">
+              <CheckCircle2 className="h-9 w-9 text-emerald-600" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+              Payment Successful!
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-md mx-auto mb-6">
+              Thank you for your purchase. Your payment was verified authoritatively and your order has been placed successfully.
+            </p>
+
+            {/* Order Details Summary Box */}
+            <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-5 mb-8 text-left space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Order Reference:</span>
+                <span className="font-mono font-bold text-slate-900">{checkout.verifiedOrder.orderId}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Payment ID:</span>
+                <span className="font-mono text-slate-700">{checkout.verifiedOrder.razorpayPaymentId}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Amount Paid:</span>
+                <span className="font-bold text-slate-900">
+                  ₹{Math.round(checkout.verifiedOrder.totalAmount).toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Payment Status:</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                  Captured & Confirmed
+                </span>
+              </div>
+            </div>
+
+            {/* Navigation Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to={
+                  checkout.verifiedOrder.id || checkout.verifiedOrder._id
+                    ? `/orders/${checkout.verifiedOrder.id || checkout.verifiedOrder._id}`
+                    : '/orders'
+                }
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 shadow-sm shadow-blue-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <span>View Order Details</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/orders"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-sm hover:bg-slate-200 transition-all focus:outline-none"
+              >
+                <span>Order History</span>
+              </Link>
+              <Link
+                to="/shop"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all focus:outline-none"
+              >
+                <span>Continue Shopping</span>
+              </Link>
+            </div>
+          </div>
+        ) : !hasItems ? (
+          /* 2. Empty Cart State */
           <div className="max-w-xl mx-auto my-12 text-center bg-white border border-slate-200/80 rounded-3xl p-8 sm:p-12 shadow-xs">
             <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-100">
               <ShoppingCart className="h-8 w-8 text-blue-600" />
@@ -511,7 +643,7 @@ export const CartPage: React.FC = () => {
                   onUpdateQuantity={handleUpdateQuantity}
                   onUpdateCustomization={handleUpdateCustomization}
                   onRemove={handleRemoveItem}
-                  isBusy={activeItemId === (item.id || item._id) || isClearing}
+                  isBusy={activeItemId === (item.id || item._id) || isClearing || checkout.isProcessing}
                 />
               ))}
             </div>
@@ -541,7 +673,7 @@ export const CartPage: React.FC = () => {
                 <div className="pt-3 border-t border-slate-100 flex items-baseline justify-between">
                   <div>
                     <span className="text-base font-bold text-slate-900 block">Total Amount</span>
-                    <span className="text-[11px] text-slate-400">Inclusive of canonical project prices</span>
+                    <span className="text-[11px] text-slate-400">Canonical server-calculated prices</span>
                   </div>
                   <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
                     ₹{Math.round(cart?.total ?? cartTotal).toLocaleString('en-IN')}
@@ -549,27 +681,51 @@ export const CartPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Checkout Button: Disabled with Coming Soon indicator */}
+              {/* Checkout Button: Active Razorpay Integration */}
               <div className="space-y-3 pt-2">
                 <button
                   type="button"
-                  disabled
-                  className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/80 flex items-center justify-center gap-2 shadow-none select-none"
-                  aria-disabled="true"
+                  onClick={checkout.initiateCheckout}
+                  disabled={
+                    checkout.isProcessing ||
+                    !hasItems ||
+                    isClearing ||
+                    activeItemId !== null
+                  }
+                  className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-blue-500/20 transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <Lock className="h-4 w-4 text-slate-400" />
-                  <span>Checkout — Coming Soon</span>
+                  {checkout.status === 'creating_order' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Initiating Order...</span>
+                    </>
+                  ) : checkout.status === 'awaiting_payment' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Opening Payment Gateway...</span>
+                    </>
+                  ) : checkout.status === 'verifying_payment' ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Verifying Payment...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" />
+                      <span>Pay with Razorpay</span>
+                    </>
+                  )}
                 </button>
 
                 <p className="text-[11px] text-slate-500 text-center leading-relaxed bg-slate-50 rounded-xl p-3 border border-slate-100">
-                  Direct payment and checkout processing will be available in upcoming project phases. All cart changes are automatically synchronized with your account.
+                  Payments are processed securely via Razorpay with 256-bit encryption. Your cart is preserved until payment is authoritatively confirmed.
                 </p>
               </div>
 
               {/* Verified Security Notice */}
               <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-400">
                 <Lock className="h-3.5 w-3.5 text-slate-400" />
-                <span>Encrypted MongoDB Cart Persistence</span>
+                <span>Encrypted MongoDB Cart & Razorpay Checkout</span>
               </div>
             </aside>
           </div>
